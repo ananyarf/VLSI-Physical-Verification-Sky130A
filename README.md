@@ -1,4 +1,6 @@
+
 # VLSI-Physical-Verification-Sky130A
+
 A hands-on VLSI physical verification project using the SKY130A PDK. Covers CMOS inverter schematic design, layout creation in Magic, Design Rule Checking (DRC), Layout Versus Schematic (LVS), SPICE netlist extraction, and post-layout transient simulation using ngspice. Documents the workflow, results, and key learnings.
 
 ## Tools Used
@@ -19,7 +21,7 @@ A hands-on VLSI physical verification project using the SKY130A PDK. Covers CMOS
 - **Virtualization:** Oracle VirtualBox
 - **Guest OS:** Ubuntu 24.04.1 LTS
 
-> **Note:** Ubuntu 26.04.1 LTS (latest) was initially attempted but caused tool compatibility issues during EDA tool compilation. Downgraded to Ubuntu 24.04.1 LTS for a stable environment.
+> **Note:** Ubuntu 26.04.1 LTS (latest) was initially attempted but caused tool compatibility issues during EDA tool compilation. Downgraded to Ubuntu 24.04.5 LTS for a stable environment.
 
 ### System Resources
 
@@ -47,7 +49,7 @@ df -h /
 nproc
 ```
 
-📸 *Screenshot: `screenshots/01_system_info.png`*
+![System Information](screenshots/01_system_info.png)
 
 ### 1.2 Package Update
 
@@ -62,7 +64,7 @@ sudo apt install git -y
 git --version
 ```
 
-📸 *Screenshot: `screenshots/02_git_setup.png`*
+![Git Setup](screenshots/02_git_setup.png)
 
 ---
 
@@ -86,7 +88,7 @@ error: too many arguments to function 'WindMove'
 error: too many arguments to function 'WindSetWindowAreas'
 ```
 
-**Cause:** Default C standard in GCC incompatible with older Magic source code.
+**Cause:** Default C standard in GCC is incompatible with older Magic source code.
 
 **Fix:**
 ```bash
@@ -118,8 +120,7 @@ magic -d XR     # launch with SKY130A tech
 
 Expected: Magic GUI launched.
 
-📸 *Screenshot: `screenshots/03_magic_version.png`*
-
+![Magic Version](screenshots/03_magic_version.png)
 
 ---
 
@@ -143,7 +144,7 @@ xschem
 
 Expected: Xschem schematic editor GUI opens.
 
-📸 *Screenshot: `screenshots/04_xschem_launch.png`*
+![Xschem Launch](screenshots/04_xschem_launch.png)
 
 ---
 
@@ -166,7 +167,7 @@ netgen
 
 Expected: Netgen Tcl interactive shell opens.
 
-📸 *Screenshot: `screenshots/05_netgen_launch.png`*
+![Netgen Launch](screenshots/05_netgen_launch.png)
 
 ---
 
@@ -187,7 +188,7 @@ ngspice
 
 Expected: NGSpice interactive simulator shell opens.
 
-📸 *Screenshot: `screenshots/06_ngspice_launch.png`*
+![NGSpice Launch](screenshots/06_ngspice_launch.png)
 
 ---
 
@@ -214,7 +215,7 @@ ls ~/Desktop/Physical_verification/open_pdks/sky130/sky130A/libs.tech/ngspice/
 
 Expected: Technology files for Magic, Netgen, and NGSpice all present.
 
-📸 *Screenshot: `screenshots/07_pdk_verify.png`*
+![PDK Verification](screenshots/07_pdk_verify.png)
 
 #### Integration Check — Magic with SKY130A
 
@@ -227,7 +228,7 @@ Inside Magic console:
 tech name     # should print: sky130A
 ```
 
-📸 *Screenshot: `screenshots/08_magic_sky130.png`*
+![Magic with SKY130A](screenshots/08_magic_sky130.png)
 
 ---
 
@@ -254,12 +255,13 @@ cd Lab1_inverter/xschem
 xschem inverter_1.sch
 ```
 
-📸 *Screenshot: `screenshots/09a_schematic.png`*
+![Inverter Schematic](screenshots/09a_schematic.png)
+
 #### Symbol Creation
 
 After creating the inverter schematic, a symbol was created for the `inverter_1` subcircuit and its pins were configured for VDD, input, output, and VSS.
 
-📸 *Screenshot: `screenshots/09b_symbol.png`*
+![Inverter Symbol](screenshots/09b_symbol.png)
 
 The schematic was netlisted in Xschem, and the generated SPICE netlist was saved.
 
@@ -271,7 +273,6 @@ XM1 out in vss vss sky130_fd_pr__nfet_01v8 L=0.18 W=4.5 nf=3
 XM2 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.18 W=3 nf=3
 .ends
 ```
-
 
 ### 3.2 Schematic Testbench — Pre-Layout Simulation
 
@@ -287,8 +288,9 @@ The testbench was drawn in Xschem with:
 
 **Observation:** Output is correct logic complement of input ✅
 
-📸 *Screenshot: `screenshots/10_tb_schematic.png`*
-📸 *Screenshot: `screenshots/11_prelayout_simulation.png`*
+![Testbench Schematic](screenshots/10_tb_schematic.png)
+
+![Pre-Layout Simulation](screenshots/11_prelayout_simulation.png)
 
 ---
 
@@ -296,7 +298,7 @@ The testbench was drawn in Xschem with:
 
 ```bash
 cd Lab1_inverter/mag
-magic -T /us
+magic 
 ```
 
 #### Import the SPICE Netlist
@@ -316,7 +318,7 @@ Layout details:
 - 3-finger layout for both devices
 - Metal2 jumper used
 
-📸 *Screenshot: `screenshots/12_layout.png`*
+![Inverter Layout](screenshots/12_layout.png)
 
 ---
 
@@ -335,7 +337,7 @@ drc why
 DRC errors: 0 ✅
 ```
 
-📸 *Screenshot: `screenshots/13_drc_clean.png`*
+![DRC Clean](screenshots/13_drc_clean.png)
 
 ---
 
@@ -374,7 +376,7 @@ Number of nets:    4             |  Number of nets:    4          ✅
 Final result: Circuits match uniquely. ✅
 ```
 
-📸 *Screenshot: `screenshots/14_lvs_match.png`*
+![LVS Match](screenshots/14_lvs_match.png)
 
 ---
 
@@ -441,7 +443,6 @@ Removed drain-to-VDD connection. Reconnected outer drain strips to `out` net. Re
 
 ---
 
-
 ### 3.7 Post-Layout Simulation — NGSpice
 
 After LVS sign-off, the Magic-extracted SPICE netlist (which includes parasitic capacitances from the actual layout) is simulated using the testbench below.
@@ -463,6 +464,7 @@ plot V(in) V(out)
 .endc
 .end
 ```
+
 #### Run
 
 ```bash
@@ -488,7 +490,7 @@ s
 | Output swing | 1.8V → 0V | 1.8V → 0V |
 | Parasitics | None (ideal) | Included (RC extracted) |
 
-📸 *Screenshot: `screenshots/15_pre_vs_post_layout_simulation.png`*
+![Pre-Layout vs Post-Layout Simulation](screenshots/15_pre_vs_post_layout_simulation.png)
 
 ---
 
@@ -507,7 +509,7 @@ s
 ## 5. Repository Structure
 
 ```
-Physical-Verification-Sky130A/
+VLSI-Physical-Verification-Sky130A/
 ├── README.md
 ├── Lab1_inverter/
 │   ├── mag/
@@ -515,7 +517,8 @@ Physical-Verification-Sky130A/
 │   │   └── inverter_1.spice
 │   ├── xschem/
 │   │   ├── inverter_1.sch
-│   │   └── inverter_1.spice
+│   │   ├── inverter_1.spice
+│   │   └── inverter_1_tb.sch
 │   ├── netgen/
 │   │   ├── run_lvs.sh
 │   │   └── inverter_1_lvs.log
@@ -524,17 +527,20 @@ Physical-Verification-Sky130A/
 └── screenshots/
     ├── 01_system_info.png
     ├── 02_git_setup.png
-    ├── 03_magic_launch.png
+    ├── 03_magic_version.png
     ├── 04_xschem_launch.png
     ├── 05_netgen_launch.png
     ├── 06_ngspice_launch.png
     ├── 07_pdk_verify.png
     ├── 08_magic_sky130.png
-    ├── 09_schematic.png
-    ├── 10_layout.png
-    ├── 11_drc_clean.png
-    ├── 12_lvs_match.png
-    └── 13_simulation_waveform.png
+    ├── 09a_schematic.png
+    ├── 09b_symbol.png
+    ├── 10_tb_schematic.png
+    ├── 11_prelayout_simulation.png
+    ├── 12_layout.png
+    ├── 13_drc_clean.png
+    ├── 14_lvs_match.png
+    └── 15_pre_vs_post_layout_simulation.png
 ```
 
 ---
