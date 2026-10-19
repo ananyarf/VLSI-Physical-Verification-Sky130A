@@ -6,9 +6,9 @@ A hands-on VLSI physical verification project using the SKY130A PDK. Covers CMOS
 | Tool | Version | Purpose |
 |---|---|---|
 | Magic VLSI | 8.3 | Layout design and DRC |
-| Xschem | 3.x | Schematic capture and netlist |
-| Netgen | 1.5.x | LVS comparison |
-| NGSpice | 39 | Pre and post-layout simulation |
+| Xschem | 3.4.8RC | Schematic capture and netlist |
+| Netgen | 1.5.325 | LVS comparison |
+| NGSpice | 37 | Pre and post-layout simulation |
 | SKY130A PDK | Latest | Process design kit |
 
 ---
@@ -25,13 +25,15 @@ A hands-on VLSI physical verification project using the SKY130A PDK. Covers CMOS
 
 | Resource | Value |
 |---|---|
-| RAM allocated | 10 GiB |
-| CPU cores | 6 |
-| Root disk size | 16 GiB |
-| Available disk | 8.6 GiB |
-| Swap | 0 GiB |
-
----
+| OS | Ubuntu 24.04.5 LTS (Noble) |
+| Kernel | 7.0.0-38-generic |
+| RAM (total) | 10 GiB |
+| RAM (available) | 2.9 GiB |
+| Swap | 4.0 GiB |
+| CPU cores | 4 |
+| Disk size | 59 GiB |
+| Disk used | 38 GiB (68%) |
+| Disk available | 19 GiB |
 
 ## 1. Environment Setup
 
@@ -50,8 +52,7 @@ nproc
 ### 1.2 Package Update
 
 ```bash
-sudo apt update
-sudo apt upgrade -y
+sudo apt update && sudo apt upgrade -y
 ```
 
 ### 1.3 Git Installation and Repository Setup
@@ -59,9 +60,6 @@ sudo apt upgrade -y
 ```bash
 sudo apt install git -y
 git --version
-git clone https://github.com/<your-username>/Physical-Verification-Sky130A.git
-cd Physical-Verification-Sky130A
-git status
 ```
 
 📸 *Screenshot: `screenshots/02_git_setup.png`*
@@ -115,12 +113,13 @@ sudo make install
 ```bash
 which magic          # /usr/local/bin/magic
 magic --version
-magic -T sky130A     # launch with SKY130A tech
+magic -d XR     # launch with SKY130A tech
 ```
 
-Expected: Magic GUI launches with SKY130A technology loaded.
+Expected: Magic GUI launched.
 
-📸 *Screenshot: `screenshots/03_magic_launch.png`*
+📸 *Screenshot: `screenshots/03_magic_version.png`*
+
 
 ---
 
@@ -129,7 +128,10 @@ Expected: Magic GUI launches with SKY130A technology loaded.
 #### Installation
 
 ```bash
-sudo apt install xschem -y
+git clone https://github.com/StefanSchippers/xschem.git xschem_git
+./configure
+make
+sudo make install
 ```
 
 #### Verify Xschem is Working
@@ -204,9 +206,10 @@ sudo make install
 #### Verify PDK Files
 
 ```bash
-ls /usr/share/pdk/sky130A/libs.tech/magic/
-ls /usr/share/pdk/sky130A/libs.tech/netgen/
-ls /usr/share/pdk/sky130A/libs.tech/ngspice/
+ls ~/Desktop/Physical_verification/open_pdks/sky130/sky130A/libs.tech/
+ls ~/Desktop/Physical_verification/open_pdks/sky130/sky130A/libs.tech/magic/
+ls ~/Desktop/Physical_verification/open_pdks/sky130/sky130A/libs.tech/netgen/
+ls ~/Desktop/Physical_verification/open_pdks/sky130/sky130A/libs.tech/ngspice/
 ```
 
 Expected: Technology files for Magic, Netgen, and NGSpice all present.
@@ -216,7 +219,7 @@ Expected: Technology files for Magic, Netgen, and NGSpice all present.
 #### Integration Check — Magic with SKY130A
 
 ```bash
-magic -T /usr/share/pdk/sky130A/libs.tech/magic/sky130A.tech
+magic -T ~/Desktop/Physical_verification/open_pdks/sky130/sky130A/libs.tech/magic/sky130A.tech
 ```
 
 Inside Magic console:
