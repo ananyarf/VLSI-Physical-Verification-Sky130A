@@ -247,10 +247,21 @@ tech name     # should print: sky130A
 
 ### 3.1 Schematic — Xschem
 
+The CMOS inverter schematic was created in Xschem using the SKY130A NFET and PFET devices. A custom symbol was also created for the inverter subcircuit so it could be instantiated in the testbench.
+
 ```bash
 cd Lab1_inverter/xschem
 xschem inverter_1.sch
 ```
+
+📸 *Screenshot: `screenshots/09a_schematic.png`*
+#### Symbol Creation
+
+After creating the inverter schematic, a symbol was created for the `inverter_1` subcircuit and its pins were configured for VDD, input, output, and VSS.
+
+📸 *Screenshot: `screenshots/09b_symbol.png`*
+
+The schematic was netlisted in Xschem, and the generated SPICE netlist was saved.
 
 **Netlist generated:**
 
@@ -261,9 +272,6 @@ XM2 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.18 W=3 nf=3
 .ends
 ```
 
-📸 *Screenshot: `screenshots/09_schematic.png`*
-
----
 
 ### 3.2 Schematic Testbench — Pre-Layout Simulation
 
@@ -273,32 +281,14 @@ Before drawing the layout, the schematic was simulated to confirm correct invert
 
 The testbench was drawn in Xschem with:
 - `V1 = 1.8V` DC supply
-- `V2` = PULSE input (0 → 1.8V, 100ps rise/fall, 5ns pulse width, 10ns period)
-- `CLOAD = 10fF` load capacitor at output
+- `V2` = PULSE input
 - `inverter_1` subcircuit instantiated
 
-```spice
-.lib "/home/ananya/Desktop/Physical_verification/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
-
-.include "inverter_1.spice"
-
-VDD vdd 0 DC 1.8
-VIN in 0 PULSE(0 1.8 0 100p 100p 5n 10n)
-
-XINV vdd in out 0 inverter_1
-CLOAD out 0 10f
-
-.control
-tran 10p 40n
-plot V(in) V(out)
-.endc
-.end
-```
 
 **Observation:** Output is correct logic complement of input ✅
 
 📸 *Screenshot: `screenshots/10_tb_schematic.png`*
-📸 *Screenshot: `screenshots/11_prelayout_waveform.png`*
+📸 *Screenshot: `screenshots/11_prelayout_simulation.png`*
 
 ---
 
@@ -306,16 +296,27 @@ plot V(in) V(out)
 
 ```bash
 cd Lab1_inverter/mag
-magic -T /usr/share/pdk/sky130A/libs.tech/magic/sky130A.tech inverter_1.mag
+magic -T /us
+```
+
+#### Import the SPICE Netlist
+
+Import the SPICE netlist generated from the Xschem schematic to create the physical layout in Magic.
+
+Inside the Magic console, import the schematic SPICE netlist:
+
+```tcl
+readspice ../xschem/inverter_1.spice
+
 ```
 
 Layout details:
 - NFET placed with VSS rail at bottom
 - PFET placed with VDD rail at top
 - 3-finger layout for both devices
-- Metal2 jumper used for PFET S1 routing (see LVS debugging section)
+- Metal2 jumper used
 
-📸 *Screenshot: `screenshots/10_layout.png`*
+📸 *Screenshot: `screenshots/12_layout.png`*
 
 ---
 
@@ -334,7 +335,7 @@ drc why
 DRC errors: 0 ✅
 ```
 
-📸 *Screenshot: `screenshots/11_drc_clean.png`*
+📸 *Screenshot: `screenshots/13_drc_clean.png`*
 
 ---
 
@@ -344,8 +345,7 @@ Inside Magic console:
 
 ```tcl
 extract all
-ext2spice hierarchy on
-ext2spice format ngspice
+ext2spice lvs
 ext2spice
 ```
 
@@ -374,7 +374,7 @@ Number of nets:    4             |  Number of nets:    4          ✅
 Final result: Circuits match uniquely. ✅
 ```
 
-📸 *Screenshot: `screenshots/12_lvs_match.png`*
+📸 *Screenshot: `screenshots/14_lvs_match.png`*
 
 ---
 
@@ -441,16 +441,10 @@ Removed drain-to-VDD connection. Reconnected outer drain strips to `out` net. Re
 
 ---
 
-### 3.7 Schematic Simulation (Pre-Layout) — NGSpice
 
-The schematic netlist from Xschem was first simulated to verify correct inverter behavior before layout.
+### 3.7 Post-Layout Simulation — NGSpice
 
-#### Testbench — `xschem/inverter_1_tb.sch`
-
-The testbench was drawn in Xschem with:
-- `V1 = 1.8V` DC supply
-- `V2` = PULSE input (0 → 1.8V, 100ps rise/fall, 5ns pulse width, 10ns period)
-- `inverter_1` subcircuit instantiated
+After LVS sign-off, the Magic-extracted SPICE netlist (which includes parasitic capacitances from the actual layout) is simulated using the testbench below.
 
 ```spice
 .lib "/home/ananya/Desktop/Physical_verification/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
@@ -469,41 +463,20 @@ plot V(in) V(out)
 .endc
 .end
 ```
-
-**Observation:** Correct inverter switching — output is logic complement of input ✅
-
-📸 *Screenshot: `screenshots/13_schematic_simulation.png`*
-
----
-
-### 3.8 Post-Layout Simulation — NGSpice
-
-After LVS sign-off, the Magic-extracted SPICE netlist (which includes parasitic capacitances from the actual layout) was simulated using the same testbench.
-
 #### Run
 
 ```bash
-cd Lab1_inverter/ngspice
+
 ngspice inv_tb.spice
 ```
-
-**Initial Transient Solution observed:**
-
-| Node | Voltage |
-|---|---|
-| vdd | 1.8 V |
-| in | 0 V |
-| out | 1.8 V |
-| vin#branch | 0 |
-| vdd#branch | -6.49e-12 |
+|
 
 **No. of Data Rows: 4053**
 
 **Observation:**
 - `in` HIGH → `out` LOW ✅
 - `in` LOW → `out` HIGH ✅
-- Post-layout waveform matches schematic simulation shape
-- Slight propagation delay visible in post-layout due to extracted parasitic capacitances from layout interconnects
+s
 
 #### Pre-Layout vs Post-Layout Comparison
 
@@ -515,7 +488,7 @@ ngspice inv_tb.spice
 | Output swing | 1.8V → 0V | 1.8V → 0V |
 | Parasitics | None (ideal) | Included (RC extracted) |
 
-📸 *Screenshot: `screenshots/14_post_layout_simulation.png`*
+📸 *Screenshot: `screenshots/15_pre_vs_post_layout_simulation.png`*
 
 ---
 
@@ -523,13 +496,11 @@ ngspice inv_tb.spice
 
 1. **Multi-finger FET connections:** Every diffusion strip must be explicitly wired. Magic extracts each floating strip as a separate net, breaking LVS.
 
-2. **Magic DRC error tiles:** The `DRC=N` in Magic's title bar shows stale internal tiles — not actual violations. Only `drc why` and `drc count` give real results.
+2. **Metal2 jumper routing:** When Metal1 routing is blocked, Metal1→Via1→Metal2→Via1→Metal1 is the standard solution to cross over conflicting nets.
 
-3. **Metal2 jumper routing:** When Metal1 routing is blocked, Metal1→Via1→Metal2→Via1→Metal1 is the standard solution to cross over conflicting nets.
+3. **LVS is diagnostic:** Net fanout counts in the LVS report precisely identify which connection is wrong, making debugging systematic.
 
-4. **LVS is diagnostic:** Net fanout counts in the LVS report precisely identify which connection is wrong, making debugging systematic.
-
-5. **OS compatibility:** Ubuntu 26.04.1 caused build failures. Ubuntu 24.04.1 LTS provided a stable environment for all EDA tools.
+4. **OS compatibility:** Ubuntu 26.04.1 caused build failures. Ubuntu 24.04.1 LTS provided a stable environment for all EDA tools.
 
 ---
 
