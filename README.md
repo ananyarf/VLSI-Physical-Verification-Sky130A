@@ -3,6 +3,66 @@
 
 A hands-on VLSI physical verification project using the SKY130A PDK. Covers CMOS inverter schematic design, layout creation in Magic, Design Rule Checking (DRC), Layout Versus Schematic (LVS), SPICE netlist extraction, and post-layout transient simulation using ngspice. Documents the workflow, results, and key learnings.
 
+## 0. Theory — SKY130A PDK and Open-Source EDA Flow
+
+### 0.1 SKY130A Process Design Kit (PDK)
+
+The SKY130A PDK is an open-source 130 nm CMOS process design kit. It provides technology files, device models, libraries, and design rules required for integrated circuit design and verification.
+
+The PDK supports CMOS device implementation and provides information used by EDA tools for schematic design, circuit simulation, physical layout, and verification.
+
+
+### 0.2 Libraries
+
+**PDK Models and Libraries**
+
+The SKY130A PDK provides different resources for different stages of the design flow:
+
+- **SPICE device models:** Describe the electrical behaviour of transistors and are used by NGSpice to simulate circuit operation.
+- **Technology files:** Define physical layers, layer properties, and design rules used by Magic VLSI for layout creation and DRC.
+- **Device and cell libraries:** Provide technology-specific device definitions and, where applicable, standard-cell information for supported design flows.
+- **LVS setup files:** Define device recognition and comparison rules used by Netgen to compare the schematic netlist with the extracted layout netlist.
+
+In this project, the SKY130A NFET and PFET devices are used to build the CMOS inverter. Xschem generates the schematic-level SPICE netlist, NGSpice simulates the circuit, Magic VLSI creates and checks the physical layout, and Netgen verifies layout-to-schematic connectivity.
+
+
+
+### 0.3 SKY130A Physical Layers
+
+The physical layout is built using technology-defined layers representing semiconductor regions, transistor gates, contacts, and metal interconnections.
+
+**Screenshot 0: SKY130A Physical Layer Stack**
+
+The diagram below shows a cross-section of the SKY130A process stack, including device regions, local interconnect, contacts, metal layers, and vias.
+
+![SKY130A Physical Layer Stack](screenshots/00_sky130_layers.png)
+
+The main structures shown in the diagram are:
+
+- **Substrate and well:** The p-substrate and N-well form the underlying semiconductor regions.
+- **Diffusion and polysilicon:** Used to form transistor active regions and gates.
+- **Local interconnect (LI):** Provides local electrical connections between device regions and upper interconnect.
+- **Contacts:** Licon and mcon connect device-level structures to local interconnect and Metal1.
+- **Metal1 to Metal5:** Five metal interconnect layers used to route electrical signals and power.
+- **Vias:** Via1, Via2, Via3, and Via4 connect successive metal layers.
+- **Dielectric layers:** Insulating materials between conductive levels electrically separate the interconnect layers.
+
+### 0.4 Open-Source EDA Flow
+
+This project uses an open-source EDA flow to design and verify a CMOS inverter.
+
+1. **Xschem — Schematic design:** Create the CMOS inverter schematic and generate its SPICE netlist.
+2. **NGSpice — Pre-layout simulation:** Simulate the schematic to verify the inverter's input-output behavior.
+3. **Magic VLSI — Physical layout:** Create and connect the transistor layout using SKY130A technology layers.
+4. **DRC — Design Rule Check:** Check the physical layout against the PDK design rules.
+5. **Extraction:** Extract the layout netlist and parasitic information from the physical layout.
+6. **Netgen — LVS verification:** Compare the extracted layout netlist against the Xschem-generated reference netlist.
+7. **NGSpice — Post-layout simulation:** Simulate the extracted circuit to evaluate its behavior with layout-related parasitic effects.
+
+This flow connects schematic design, circuit simulation, physical layout, and verification to check that the implemented layout behaves as intended and matches the reference circuit.
+
+---
+
 ## Tools Used
 
 | Tool | Version | Purpose |
@@ -570,6 +630,7 @@ VLSI-Physical-Verification-Sky130A/
 │       ├── prelayout_waveform.raw
 │       └── xschemrc
 └── screenshots/
+    ├── 00_sky130_layers.png
     ├── 01_system_info.png
     ├── 02_git_setup.png
     ├── 03_magic_version.png
