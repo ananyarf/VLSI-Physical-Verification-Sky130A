@@ -248,7 +248,7 @@ tech name     # should print: sky130A
 
 ### 3.1 Schematic — Xschem
 
-The CMOS inverter schematic was created in Xschem using the SKY130A NFET and PFET devices. A custom symbol was also created for the inverter subcircuit so it could be instantiated in the testbench.
+The CMOS inverter schematic is created in Xschem using the SKY130A NFET and PFET devices. A custom symbol is also created for the inverter subcircuit so it can be instantiated in the testbench.
 
 ```bash
 cd Lab1_inverter/xschem
@@ -259,11 +259,11 @@ xschem inverter_1.sch
 
 #### Symbol Creation
 
-After creating the inverter schematic, a symbol was created for the `inverter_1` subcircuit and its pins were configured for VDD, input, output, and VSS.
+After creating the inverter schematic, a symbol is created for the `inverter_1` subcircuit, and its pins were configured for VDD, input, output, and VSS.
 
 ![Inverter Symbol](screenshots/09b_symbol.png)
 
-The schematic was netlisted in Xschem, and the generated SPICE netlist was saved.
+The schematic is netlisted in Xschem, and the generated SPICE netlist was saved.
 
 **Netlist generated:**
 
@@ -276,7 +276,7 @@ XM2 out in vdd vdd sky130_fd_pr__pfet_01v8 L=0.18 W=3 nf=3
 
 ### 3.2 Schematic Testbench — Pre-Layout Simulation
 
-Before drawing the layout, the schematic was simulated to confirm correct inverter behavior using NGSpice.
+Before drawing the layout, the schematic is simulated to confirm correct inverter behavior using NGSpice.
 
 #### Testbench Circuit — `xschem/inverter_1_tb.sch`
 
@@ -286,7 +286,7 @@ The testbench was drawn in Xschem with:
 - `inverter_1` subcircuit instantiated
 
 
-**Observation:** Output is correct logic complement of input ✅
+**Observation:** Output is the correct logical complement of the input 
 
 ![Testbench Schematic](screenshots/10_tb_schematic.png)
 
@@ -303,9 +303,9 @@ magic
 
 #### Import the SPICE Netlist
 
-Import the SPICE netlist generated from the Xschem schematic to create the physical layout in Magic.
+The physical layout is drawn and connected in Magic using SKY130A layers and design rules. `readspice` reads a SPICE netlist; it does not automatically generate a routed physical layout.
 
-Inside the Magic console, import the schematic SPICE netlist:
+Inside the Magic console, read the schematic SPICE netlist when needed:
 
 ```tcl
 readspice ../xschem/inverter_1.spice
@@ -313,7 +313,7 @@ readspice ../xschem/inverter_1.spice
 ```
 
 Layout details:
-- NFET placed with VSS rail at bottom
+- NFET placed with VSS rail at the bottom
 - PFET placed with VDD rail at top
 - 3-finger layout for both devices
 - Metal2 jumper used
@@ -324,7 +324,7 @@ Layout details:
 
 ### 3.3 DRC — Design Rule Check
 
-Inside Magic console:
+Inside the Magic console:
 
 ```tcl
 drc check
@@ -334,7 +334,7 @@ drc why
 
 **Result:**
 ```
-DRC errors: 0 ✅
+DRC errors: 0 
 ```
 
 ![DRC Clean](screenshots/13_drc_clean.png)
@@ -343,7 +343,7 @@ DRC errors: 0 ✅
 
 ### 3.4 Extraction from Magic
 
-Inside Magic console:
+Inside the Magic console:
 
 ```tcl
 extract all
@@ -368,12 +368,12 @@ cat /tmp/inverter_1_lvs.log
 **Final result:**
 
 ```
-sky130_fd_pr__nfet_01v8 (3->1)  |  sky130_fd_pr__nfet_01v8 (1)  ✅
-sky130_fd_pr__pfet_01v8 (3->1)  |  sky130_fd_pr__pfet_01v8 (1)  ✅
-Number of devices: 2             |  Number of devices: 2          ✅
-Number of nets:    4             |  Number of nets:    4          ✅
+sky130_fd_pr__nfet_01v8 (3->1)  |  sky130_fd_pr__nfet_01v8 (1)  
+sky130_fd_pr__pfet_01v8 (3->1)  |  sky130_fd_pr__pfet_01v8 (1)  
+Number of devices: 2            |  Number of devices: 2          
+Number of nets:    4            |  Number of nets:    4          
 
-Final result: Circuits match uniquely. ✅
+Final result: Circuits match uniquely. 
 ```
 
 ![LVS Match](screenshots/14_lvs_match.png)
@@ -397,7 +397,7 @@ A 3-finger NFET has 4 diffusion strips alternating Drain-Source-Drain-Source. Th
 **Fix:**
 Added Metal1 contacts on both inner source strips of NFET and connected them to the VSS rail.
 
-**Result:** NFET 3 separate devices → 1 merged device ✅
+**Result:** NFET 3 separate devices → 1 merged device 
 
 ---
 
@@ -409,37 +409,21 @@ Added Metal1 contacts on both inner source strips of NFET and connected them to 
 S1 routing upward to VDD was blocked by D2 (drain connected to `out`). Routing Metal1 directly caused a short between `out` and `vdd`.
 
 **Fix:**
-Used Metal1 → Via1 → Metal2 → Via1 → Metal1 jumper to route over D2 without shorting.
+Used a roundabout from the in pin [Metal1 → Via1 → Metal2 → Via1 → Metal1] jumper to route over D2 without shorting.
 
-**Result:** PFET 3 devices → 1 merged device ✅
-
----
-
-#### Problem 3 — `out` net disappeared (nets: 3 vs 4)
-
-**Error:**
-```
-Layout pins: vdd, in, vss   ← only 3 nets
-(no pin, node is vdd)       ← out merged into vdd accidentally
-```
-
-**Root cause:**
-During PFET drain reconnection, the outer drain strips (which should go to `out`) were accidentally wired to VDD, collapsing the `out` net entirely.
-
-**Fix:**
-Removed drain-to-VDD connection. Reconnected outer drain strips to `out` net. Re-placed `out` port label in Magic.
+**Result:** PFET 3 devices → 1 merged device 
 
 ---
+
 
 #### LVS Progression Summary
 
 | Attempt | NFET | PFET | Nets L/S | Devices L/S | Status |
 |---|---|---|---|---|---|
-| Initial | 3→2 | 3→2 | 8 vs 4 | 4 vs 2 | ❌ |
-| Fix NFET S1,S2 | 3→1 | 3→2 | 5 vs 4 | 3 vs 2 | ❌ |
-| Fix PFET S2 only | 3→1 | 3→2 | 5 vs 4 | 3 vs 2 | ❌ |
-| Drain shorted to VDD | 3→1 | 3→1 | 3 vs 4 | 2 vs 2 | ❌ |
-| Fix drain + S1 via jumper | 3→1 | 3→1 | 4 vs 4 | 2 vs 2 | ✅ |
+| Initial | 3→2 | 3→2 | 8 vs 4 | 4 vs 2 | Wrong |
+| Fix NFET S1,S2 | 3→1 | 3→2 | 5 vs 4 | 3 vs 2 | Wrong |
+| Fix PFET S2 only | 3→1 | 3→2 | 5 vs 4 | 3 vs 2 | Wrong |
+| Fix drain + S1 via jumper | 3→1 | 3→1 | 4 vs 4 | 2 vs 2 | Correct |
 
 ---
 
@@ -469,22 +453,21 @@ plot V(in) V(out)
 
 ```bash
 
-ngspice inv_tb.spice
+ngspice postlayout_tb.spice
 ```
 |
 
 **No. of Data Rows: 4053**
 
 **Observation:**
-- `in` HIGH → `out` LOW ✅
-- `in` LOW → `out` HIGH ✅
-s
+- `in` HIGH → `out` LOW 
+- `in` LOW → `out` HIGH 
 
 #### Pre-Layout vs Post-Layout Comparison
 
 | Parameter | Schematic Sim | Post-Layout Sim |
 |---|---|---|
-| Logic function | Correct inverter ✅ | Correct inverter ✅ |
+| Logic function | Correct inverter  | Correct inverter  |
 | VDD | 1.8V | 1.8V |
 | Input swing | 0 → 1.8V | 0 → 1.8V |
 | Output swing | 1.8V → 0V | 1.8V → 0V |
@@ -494,7 +477,18 @@ s
 
 ---
 
-## 4. Key Learnings
+## 4. Observations
+
+1. **Pre-layout simulation:** The schematic testbench showed complementary input and output waveforms, confirming the intended CMOS inverter logic before layout.
+  
+2. **DRC:** The final Magic layout was checked with `drc check` and `drc count`. The documented final result was **0 DRC errors**.
+  
+3. **LVS:** The final LVS run showed the circuits matched uniquely.
+
+4. **Post-layout simulation:** The extracted layout netlist was simulated with NGSpice. The output remained complementary to the input. The post-layout netlist includes layout-extracted parasitics, unlike the ideal schematic-level simulation.
+
+  
+## 5. Key Learnings
 
 1. **Multi-finger FET connections:** Every diffusion strip must be explicitly wired. Magic extracts each floating strip as a separate net, breaking LVS.
 
@@ -506,24 +500,36 @@ s
 
 ---
 
-## 5. Repository Structure
+## 6. Repository Structure
 
 ```
+
 VLSI-Physical-Verification-Sky130A/
 ├── README.md
 ├── Lab1_inverter/
 │   ├── mag/
+│   │   ├── inverter_1.ext
 │   │   ├── inverter_1.mag
-│   │   └── inverter_1.spice
-│   ├── xschem/
-│   │   ├── inverter_1.sch
 │   │   ├── inverter_1.spice
-│   │   └── inverter_1_tb.sch
+│   │   ├── sky130_fd_pr__nfet_01v8_KBZXWL.ext
+│   │   ├── sky130_fd_pr__nfet_01v8_KBZXWL.mag
+│   │   ├── sky130_fd_pr__pfet_01v8_XQ58Y7.ext
+│   │   └── sky130_fd_pr__pfet_01v8_XQ58Y7.mag
 │   ├── netgen/
-│   │   ├── run_lvs.sh
-│   │   └── inverter_1_lvs.log
-│   └── ngspice/
-│       └── inv_tb.spice
+│   │   ├── inverter_1_lvs.log
+│   │   └── sky130A_setup.tcl
+│   ├── ngspice/
+│   │   ├── postlayout_tb.spice
+│   │   └── postlayout_waveform.raw
+│   └── xschem/
+│       ├── inverter_1.sch
+│       ├── inverter_1.spice
+│       ├── inverter_1.sym
+│       ├── inverter_1_tb.sch
+│       ├── inverter_1_tb.spice
+│       ├── inverter_tb.sch
+│       ├── prelayout_waveform.raw
+│       └── xschemrc
 └── screenshots/
     ├── 01_system_info.png
     ├── 02_git_setup.png
@@ -541,11 +547,12 @@ VLSI-Physical-Verification-Sky130A/
     ├── 13_drc_clean.png
     ├── 14_lvs_match.png
     └── 15_pre_vs_post_layout_simulation.png
+
 ```
 
 ---
 
-## 6. References
+## 7. References
 
 - [SKY130A PDK Documentation](https://skywater-pdk.readthedocs.io/)
 - [Magic VLSI User Guide](http://opencircuitdesign.com/magic/)
