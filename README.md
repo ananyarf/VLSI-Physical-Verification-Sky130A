@@ -19,7 +19,7 @@ A hands-on VLSI physical verification project using the SKY130A PDK. Covers CMOS
 
 - **Host OS:** Windows 11
 - **Virtualization:** Oracle VirtualBox
-- **Guest OS:** Ubuntu 24.04.1 LTS
+- **Guest OS:** Ubuntu 24.04.5 LTS
 
 > **Note:** Ubuntu 26.04.1 LTS (latest) was initially attempted but caused tool compatibility issues during EDA tool compilation. Downgraded to Ubuntu 24.04.5 LTS for a stable environment.
 
@@ -48,7 +48,9 @@ free -h
 df -h /
 nproc
 ```
+**Screenshot 1: System Information and Environment Verification**
 
+Shows the Ubuntu operating system details, kernel version, available memory, CPU cores, and disk usage used for the project.
 ![System Information](screenshots/01_system_info.png)
 
 ### 1.2 Package Update
@@ -63,6 +65,9 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install git -y
 git --version
 ```
+**Screenshot 2: Git Version Verification**
+
+Shows Git version verification for source code management and project documentation.
 
 ![Git Setup](screenshots/02_git_setup.png)
 
@@ -97,19 +102,6 @@ make clean
 make
 ```
 
-#### Problem 2 — Missing OpenGL Header
-
-```
-fatal error: GL/glu.h: No such file or directory
-```
-
-**Fix:**
-```bash
-sudo apt install libgl-dev libglu1-mesa-dev -y
-make
-sudo make install
-```
-
 #### Verify Magic is Working
 
 ```bash
@@ -118,7 +110,10 @@ magic --version
 magic -d XR     # launch with SKY130A tech
 ```
 
-Expected: Magic GUI launched.
+
+**Screenshot 3: Magic VLSI Verification**
+
+Shows the installed Magic VLSI tool and its version, confirming that the layout editor is available for physical design and DRC.
 
 ![Magic Version](screenshots/03_magic_version.png)
 
@@ -142,7 +137,10 @@ xschem --version
 xschem
 ```
 
-Expected: Xschem schematic editor GUI opens.
+
+**Screenshot 4: Xschem Launch and Verification**
+
+Shows Xschem running successfully, confirming that the schematic capture and SPICE netlisting environment is available.
 
 ![Xschem Launch](screenshots/04_xschem_launch.png)
 
@@ -165,7 +163,10 @@ netgen --version
 netgen
 ```
 
-Expected: Netgen Tcl interactive shell opens.
+
+**Screenshot 5: Netgen Verification**
+
+Shows Netgen launching successfully for Layout Versus Schematic (LVS) comparison.
 
 ![Netgen Launch](screenshots/05_netgen_launch.png)
 
@@ -186,7 +187,10 @@ ngspice --version
 ngspice
 ```
 
-Expected: NGSpice interactive simulator shell opens.
+
+**Screenshot 6: NGSpice Verification**
+
+Shows NGSpice launching successfully for SPICE-based circuit simulation.
 
 ![NGSpice Launch](screenshots/06_ngspice_launch.png)
 
@@ -213,7 +217,10 @@ ls ~/Desktop/Physical_verification/open_pdks/sky130/sky130A/libs.tech/netgen/
 ls ~/Desktop/Physical_verification/open_pdks/sky130/sky130A/libs.tech/ngspice/
 ```
 
-Expected: Technology files for Magic, Netgen, and NGSpice all present.
+
+**Screenshot 7: SKY130A PDK Verification**
+
+Shows the SKY130A PDK technology files and supporting libraries used by Magic, Netgen, and NGSpice.
 
 ![PDK Verification](screenshots/07_pdk_verify.png)
 
@@ -227,8 +234,11 @@ Inside Magic console:
 ```tcl
 tech name     # should print: sky130A
 ```
+**Screenshot 8: SKY130A Technology Integration with Magic**
 
-![Magic with SKY130A](screenshots/08_magic_sky130.png)
+Shows Magic launched with the SKY130A technology file, confirming that the process technology is loaded for layout design and design rule checking.
+
+![Magic with SKY130A](screenshots/08_magic_sky_130.png)
 
 ---
 
@@ -248,12 +258,15 @@ tech name     # should print: sky130A
 
 ### 3.1 Schematic — Xschem
 
-The CMOS inverter schematic is created in Xschem using the SKY130A NFET and PFET devices. A custom symbol is also created for the inverter subcircuit so it can be instantiated in the testbench.
+The CMOS inverter schematic is created in Xschem using the SKY130A NFET and PFET devices. 
 
 ```bash
 cd Lab1_inverter/xschem
 xschem inverter_1.sch
 ```
+**Screenshot 9: CMOS Inverter Schematic in Xschem**
+
+Shows the CMOS inverter schematic containing the SKY130A NFET and PFET devices, with the input, output, VDD, and VSS connections.
 
 ![Inverter Schematic](screenshots/09a_schematic.png)
 
@@ -261,9 +274,13 @@ xschem inverter_1.sch
 
 After creating the inverter schematic, a symbol is created for the `inverter_1` subcircuit, and its pins were configured for VDD, input, output, and VSS.
 
+**Screenshot 10: Custom CMOS Inverter Symbol**
+
+Shows the custom symbol created for the inverter subcircuit, with pins configured for VDD, input, output, and VSS.
+
 ![Inverter Symbol](screenshots/09b_symbol.png)
 
-The schematic is netlisted in Xschem, and the generated SPICE netlist was saved.
+The schematic is netlisted in Xschem, and the generated SPICE netlist is saved.
 
 **Netlist generated:**
 
@@ -285,10 +302,15 @@ The testbench was drawn in Xschem with:
 - `V2` = PULSE input
 - `inverter_1` subcircuit instantiated
 
+**Screenshot 11: Pre-Layout Simulation Testbench**
 
-**Observation:** Output is the correct logical complement of the input 
+Shows the Xschem testbench used to simulate the CMOS inverter before layout, including the supply voltage, input pulse source, and inverter instance.
 
 ![Testbench Schematic](screenshots/10_tb_schematic.png)
+
+**Screenshot 12: Pre-Layout Transient Simulation**
+
+Shows the NGSpice transient simulation waveforms before layout, demonstrating the complementary relationship between the inverter input and output.
 
 ![Pre-Layout Simulation](screenshots/11_prelayout_simulation.png)
 
@@ -314,9 +336,13 @@ readspice ../xschem/inverter_1.spice
 
 Layout details:
 - NFET placed with VSS rail at the bottom
-- PFET placed with VDD rail at top
+- PFET placed with VDD rail at the top
 - 3-finger layout for both devices
 - Metal2 jumper used
+
+**Screenshot 13: CMOS Inverter Layout in Magic VLSI**
+
+Shows the physical layout of the CMOS inverter using SKY130A layers, including the NFET, PFET, metal interconnects, and supply connections.
 
 ![Inverter Layout](screenshots/12_layout.png)
 
@@ -337,6 +363,10 @@ drc why
 DRC errors: 0 
 ```
 
+**Screenshot 14: Design Rule Check (DRC) Verification**
+
+Shows the final Magic DRC verification result. The documented final result is zero DRC errors.
+
 ![DRC Clean](screenshots/13_drc_clean.png)
 
 ---
@@ -355,6 +385,8 @@ ext2spice
 
 ### 3.5 LVS — Layout vs Schematic
 
+LVS is performed using Netgen to verify that the physical layout matches the original circuit schematic. For this comparison, the **SPICE netlist generated from Xschem** is compared with the **SPICE netlist extracted from the Magic layout** to check whether the devices and electrical connections match.
+
 ```bash
 cd Lab1_inverter/netgen
 netgen -batch lvs \
@@ -362,7 +394,6 @@ netgen -batch lvs \
   "../xschem/inverter_1.spice inverter_1" \
   /usr/share/pdk/sky130A/libs.tech/netgen/sky130A_setup.tcl \
   /tmp/inverter_1_lvs.log
-cat /tmp/inverter_1_lvs.log
 ```
 
 **Final result:**
@@ -375,6 +406,10 @@ Number of nets:    4            |  Number of nets:    4
 
 Final result: Circuits match uniquely. 
 ```
+
+**Screenshot 15: Layout Versus Schematic (LVS) Verification**
+
+Shows the Netgen LVS comparison between the extracted layout netlist and the reference schematic netlist, with the final result indicating that the circuits match uniquely.
 
 ![LVS Match](screenshots/14_lvs_match.png)
 
@@ -455,7 +490,6 @@ plot V(in) V(out)
 
 ngspice postlayout_tb.spice
 ```
-|
 
 **No. of Data Rows: 4053**
 
@@ -473,7 +507,12 @@ ngspice postlayout_tb.spice
 | Output swing | 1.8V → 0V | 1.8V → 0V |
 | Parasitics | None (ideal) | Included (RC extracted) |
 
-![Pre-Layout vs Post-Layout Simulation](screenshots/15_pre_vs_post_layout_simulation.png)
+
+**Screenshot 16: Pre-Layout vs. Post-Layout Simulation**
+
+The left waveform shows the pre-layout simulation, while the right shows the post-layout simulation. In both, `V(out)` (blue) is the logical complement of `V(in)` (red), confirming correct CMOS inverter operation.
+
+![Pre-Layout vs. Post-Layout Simulation](screenshots/15_pre_vs_post_layout_simulation.png)
 
 ---
 
