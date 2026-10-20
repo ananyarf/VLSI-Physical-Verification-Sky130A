@@ -1,0 +1,17 @@
+* Post-layout simulation testbench
+.lib "/home/ananya/Desktop/Physical_verification/open_pdks/sky130/sky130A/libs.tech/ngspice/sky130.lib.spice" tt
+
+.include "inverter_1.spice"
+
+VDD vdd 0 DC 1.8
+VIN in 0 PULSE(0 1.8 0 100p 100p 5n 10n)
+
+XINV vdd in out 0 inverter_1
+CLOAD out 0 10f
+
+.control
+tran 10p 40n
+plot v(in) v(out)
+.endc
+
+.end
