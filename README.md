@@ -302,6 +302,29 @@ Shows Magic launched with the SKY130A technology file, confirming that the proce
 
 ---
 
+### 2.6 Device Layout — SKY130A Transistor Layer Inspection
+
+To understand how MOS transistors are represented in physical layout, the SKY130A NFET and PFET device cells were loaded and inspected in Magic VLSI with the SKY130A technology.
+
+The device layouts contain multiple technology layers that define the transistor structure and its electrical connections.
+
+- **NFET:** The layout shows the NMOS device structure, including diffusion, polysilicon, contacts, and metal interconnects.
+- **PFET:** The layout shows the PMOS device structure and its corresponding physical layers. The surrounding well and substrate-related regions are also visible.
+
+Inspecting these layers helps explain how transistor terminals and gate structures are represented physically before integrating devices into a complete CMOS circuit.
+
+**Screenshot : SKY130A NFET Device Layout**
+
+![SKY130A NFET device layout](screenshots/NFET_device.jpeg)
+
+Shows the SKY130A NFET device cell loaded in Magic VLSI, with its physical layers displayed.
+
+**Screenshot : SKY130A PFET Device Layout**
+
+![SKY130A PFET device layout](screenshots/PFET_device.jpeg)
+
+Shows the SKY130A PFET device cell loaded in Magic VLSI, with its physical layers and surrounding regions displayed.
+
 ## 3. Lab 1 — CMOS Inverter Physical Verification
 
 ### Inverter Specifications
